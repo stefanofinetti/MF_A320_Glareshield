@@ -75,10 +75,7 @@ void MFCustomDevice::attach(uint16_t adrPin, uint16_t adrType, uint16_t adrConfi
         variable is used to store the type.
     ********************************************************************************** */
     getStringFromMem(adrType, parameter, configFromFlash);
-    // "GAGAGU_FCU-EFIS" is what boards flashed with the upstream firmware carry
-    // in their EEPROM. Accepting it too means this firmware drops straight onto
-    // such a board without rebuilding its configuration first.
-    if (strcmp(parameter, "SF_FCU") == 0 || strcmp(parameter, "GAGAGU_FCU-EFIS") == 0)
+    if (strcmp(parameter, "SF_FCU") == 0)
         _customType = FCU_EFIS_DEVICE;
 
     if (_customType == FCU_EFIS_DEVICE) {
