@@ -23,15 +23,18 @@ static void setValue(char *dst, const char *src)
     dst[VALUE_LEN - 1] = 0x00;
 }
 
+/* The EFIS displays come up showing what the aircraft shows cold and dark:
+   QNH in hectopascals, 1013. Mode 1 is QNH, select 1 is hPa. */
+
 // Efis left
-uint8_t efisLeftBaroMode              = 0x00;
-uint8_t efisLeftBaroSelect            = 0x00;
+uint8_t efisLeftBaroMode              = 0x01;
+uint8_t efisLeftBaroSelect            = 0x01;
 char    efisLeftBaroValueHpa[VALUE_LEN] = "1013";
 char    efisLeftBaroValueHg[VALUE_LEN]  = "2992";
 
 // Efis right
-uint8_t efisRightBaroMode              = 0x00;
-uint8_t efisRightBaroSelect            = 0x00;
+uint8_t efisRightBaroMode              = 0x01;
+uint8_t efisRightBaroSelect            = 0x01;
 char    efisRightBaroValueHpa[VALUE_LEN] = "1013";
 char    efisRightBaroValueHg[VALUE_LEN]  = "2992";
 
