@@ -64,7 +64,8 @@ uint8_t lightTestOn = 0x00;
 
 FCU_EFIS::FCU_EFIS()
 {
-    _initialised = false;
+    _initialised  = false;
+    _refreshIndex = 0;
 }
 
 void FCU_EFIS::attach(uint8_t addrI2C)
@@ -296,16 +297,46 @@ void FCU_EFIS::set(int16_t messageID, char *message)
     }
 }
 
+/* **********************************************************************************
+    Nothing here needs new values from the Connector: this exists only so that a
+    display which missed an update gets painted again instead of showing a stale
+    frame until the next value happens to arrive.
+
+    One display per call, in turn. Redrawing all seven would block the loop for
+    roughly 200 ms and cost encoder steps; one costs about 30 ms, which is what
+    an incoming value already costs. With the poll interval set in the .ini this
+    works out to a full sweep every few seconds.
+********************************************************************************** */
 void FCU_EFIS::update()
 {
-    // Do something which is required regulary
-    updateDisplayEfisLeft();
-    updateDisplayEfisRight();
-    updateDisplayFcuSpd();
-    updateDisplayFcuHdg();
-    updateDisplayFcuAlt();
-    updateDisplayFcuFpa();
-    updateDisplayFcuVs();
+    if (!_initialised)
+        return;
+
+    switch (_refreshIndex) {
+    case 0:
+        updateDisplayEfisLeft();
+        break;
+    case 1:
+        updateDisplayEfisRight();
+        break;
+    case 2:
+        updateDisplayFcuSpd();
+        break;
+    case 3:
+        updateDisplayFcuHdg();
+        break;
+    case 4:
+        updateDisplayFcuFpa();
+        break;
+    case 5:
+        updateDisplayFcuAlt();
+        break;
+    default:
+        updateDisplayFcuVs();
+        _refreshIndex = 0;
+        return;
+    }
+    _refreshIndex++;
 }
 
 /* ************************************************************************************************

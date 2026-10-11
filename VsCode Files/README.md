@@ -54,6 +54,23 @@ multiplexer switch plus a 1 KB frame at 400 kHz. At 115200 baud more than 300
 bytes can arrive in that window, so the template's 96-byte receive buffer
 would drop characters. Do not lower it.
 
+### Periodic redraw
+
+`MF_CUSTOMDEVICE_HAS_UPDATE` is on, with `MF_CUSTOMDEVICE_POLL_MS` at 500. The
+Connector sends a value only when it changes, so a display that misses one
+update keeps a stale frame until that value happens to change again - which, for
+something like the barometer unit, can be the rest of the flight. The periodic
+redraw paints it again instead.
+
+`update()` redraws **one** display per call and moves on to the next, so a call
+costs about 30 ms, the same as handling an incoming value. Redrawing all seven
+in one go would block the loop for roughly 200 ms and cost encoder steps. At 500
+ms per display the whole panel is refreshed every 3.5 seconds.
+
+This cures a lost frame on the glass. It does not cure a lost command on the
+serial line: the redraw reads the same variables, so if a value never reached
+the board, repainting shows the same wrong thing.
+
 ### Footprint
 
 The ATmega2560 has 8 KB of RAM and MobiFlight reserves most of it up front:
@@ -137,7 +154,8 @@ folder of your MobiFlight installation, then flash from the Connector.
 
 * MessageID −1 (Connector closing) and −2 (power saving, after the 600 s in
   the `.mfmc`) are not handled, so the displays keep showing the last values
-  instead of going dark. On OLEDs that is a burn-in risk.
+  instead of going dark. On OLEDs that is a burn-in risk, and the periodic
+  redraw now keeps painting those same values.
 * The Mach zero-padding in `updateDisplayFcuSpd()` writes past the end of the
   `String` and silently does nothing.
 * The zero-padding elsewhere relies on `String::operator[]` returning a zeroed

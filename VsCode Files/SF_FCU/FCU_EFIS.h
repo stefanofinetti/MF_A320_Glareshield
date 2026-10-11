@@ -33,6 +33,7 @@ public:
 private:
     bool          _initialised;
     uint8_t       _addrI2C;
+    uint8_t       _refreshIndex;   // which display update() redraws next
     OLEDInterface *oled;
 
     void setTCAChannel(byte i);
